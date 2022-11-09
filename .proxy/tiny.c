@@ -59,17 +59,27 @@ void doit(int fd)
   printf("Request headers :\n");
   printf("%s", buf);
   sscanf(buf, "%s %s %s", method, uri, version); 
+  
+  // if (strcasecmp(method, "GET")!=0) {// strcasecmp 대소문자 비교하지 않고 문자열 비교
+  //   clienterror(fd, method, "501", "Not implemented", 
+  //     "Tiny does not implement this method");
+  //     return;
+  // }
 
   if (strcasecmp(method, "GET") == 0){
     read_requesthdrs(&rio); 
     /* Parse URI from GET request */
+    printf("header_end \n");
+    printf("%s, %s, %s\n", uri, filename, cgiargs);
     is_static = parse_uri(uri, filename, cgiargs); 
     if (stat(filename, &sbuf) < 0) { // 파일 경로를 넘겨주면, 파일의 정보를 얻는다. // 경로가 맞지 않을 경우 
       clienterror(fd, filename, "404", "Not found",
                   "Tiny couldn't find this file");
       return;
     }
+    printf("if static \n");
     if (is_static) { /* Serve static content 정적 파일*/
+      printf("static yes\n");
       if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) { //파일의 종류 및 접근 권한 // 파일 권한 체크
         clienterror(fd, filename, "403", "Forbidden",
           "Tiny couldn't read the file");
@@ -127,6 +137,33 @@ void doit(int fd)
       "Tiny does not implement this method");
       return;
   }
+  // read_requesthdrs(&rio); 
+  // /* Parse URI from GET request */
+  // is_static = parse_uri(uri, filename, cgiargs); 
+  // if (stat(filename, &sbuf) < 0) { // 파일 경로를 넘겨주면, 파일의 정보를 얻는다. // 경로가 맞지 않을 경우 
+  //   clienterror(fd, filename, "404", "Not found",
+  //               "Tiny couldn't find this file");
+  //   return;
+  // }
+
+  // if (is_static) { /* Serve static content 정적 파일*/
+  //   if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) { //파일의 종류 및 접근 권한 // 파일 권한 체크
+  //     clienterror(fd, filename, "403", "Forbidden",
+  //       "Tiny couldn't read the file");
+  //     return;
+  //   }
+  //   serve_static(fd, filename, sbuf.st_size);
+  // }
+
+
+  // else { /* Serve dynamic content 동적 파일*/
+  //   if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) { //파일의 종류 및 접근 권한 // 파일 권한 체크
+  //     clienterror(fd, filename, "403", "Forbidden",
+  //       "Tiny couldn't run the CGI program");
+  //     return;
+  //   }
+  //   serve_dynamic(fd, filename, cgiargs);
+  // }
 }
 
 
@@ -204,6 +241,7 @@ GET메서드
 // 정적 컨텐츠를 클라이언트에게 서비스
 void serve_static (int fd, char *filename, int filesize) 
 {
+  printf("-------do static\n----------");
   int srcfd;
   char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
@@ -225,8 +263,7 @@ void serve_static (int fd, char *filename, int filesize)
   // Rio_writen(fd, srcp, filesize);  // 실제로 파일을 클라이언트에게 전송
   // Munmap(srcp, filesize); // 가상메모리 반환
 
-  /* 
-  11.9 Mmap-> Malloc으로 변경
+  /* 11.9
   */
   srcfd = Open(filename, O_RDONLY, 0); // 읽기 전용
   srcp = (char*)Malloc(filesize);
@@ -293,6 +330,7 @@ HEAD 메소드
 */
 void serve_static_head (int fd, char *filename, int filesize) 
 {
+  printf("-------do static\n----------");
   int srcfd;
   char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
@@ -318,6 +356,9 @@ void serve_static_head (int fd, char *filename, int filesize)
 
 void serve_dynamic_head(int fd, char *filename, char *cgiargs)
 {
+  printf("-------do dynamic----------\n");
+  printf("------cgiargs-------\n");
+  printf("%s", cgiargs);
   char buf[MAXLINE], *emptylist[] = { NULL };
 
   /* Return first part of HTTP response*/

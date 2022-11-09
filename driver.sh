@@ -272,7 +272,6 @@ echo "basicScore: $basicScore/${MAX_BASIC}"
 # Concurrency
 #
 
-echo ""
 echo "*** Concurrency ***"
 
 # Run the Tiny Web server
@@ -303,6 +302,7 @@ nop_pid=$!
 
 # Wait for the nop server to start in earnest
 wait_for_port_use "${nop_port}"
+echo "hello"
 
 # Try to fetch a file from the blocking nop-server using the proxy
 clear_dirs

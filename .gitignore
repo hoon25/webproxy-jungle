@@ -60,4 +60,7 @@ proxy
 modules.order
 Module.symvers
 Mkfile.old
-dkms.conf
+dkms.con
+
+# vscode
+.vscode/
